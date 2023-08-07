@@ -5,7 +5,7 @@ const moment = require("moment");
 
 const Register_New_User = async (req, res, next) => {
   const typed_Email = req.body.email;
-  const typed_phone_number = req.body.phone_number;
+
 
   try {
     if (typed_Email) {
@@ -24,7 +24,7 @@ const Register_New_User = async (req, res, next) => {
         req.body.password,
         process.env.SECRET_KEY
       ).toString(),
-      phone_number: typed_phone_number,
+      role : req.body.role,
       user_device_token: req.body.user_device_token || "asdfghjkl",
       user_device_type: req.body.user_device_type || "android",
     };
@@ -62,25 +62,42 @@ const Complete_Profile = async (req, res, next) => {
   try {
     const find_email = await User.findOne({ email: email });
     const userAvator = req?.file?.path?.replace(/\\/g, "/");
-    const db = moment(req.body.dob);
-    const complete_profile = await User.updateOne(
+    find_email.role === 'Client' ? 
+     (  complete_profile = await User.updateOne(
       { email: find_email.email },
       {
         $set: {
           user_image: userAvator,
           name: req.body.name,
-          dob: db.format("YYYY-MM-DD"),
-          gender: req.body.gender,
-          address: req.body.address,
+          company_name: req.body.company_name,
+          business_phone_number: req.body.business_phone_number,
+          phone_number: req.body.phone_number,
           state: req.body.state,
-          city: req.body.city,
-          role: req.body.role,
+          category: req.body.category,
           user_is_profile_complete: true,
           is_verified: true,
         },
       },
       { new: true }
-    );
+    ) ) : find_email.role === 'Freelancer' ? 
+   ( complete_profile = await User.updateOne(
+      { email: find_email.email },
+      {
+        $set: {
+          user_image: userAvator,
+          name: req.body.name,
+          //company_name: req.body.company_name,
+          //business_phone_number: req.body.business_phone_number,
+          phone_number: req.body.phone_number,
+          state: req.body.state,
+          category: req.body.category,
+          user_is_profile_complete: true,
+          is_verified: true,
+        },
+      },
+      { new: true }
+    )) : null
+
 
     res.status(200).send({
       message: "Profile Completed Successfully",
@@ -438,7 +455,6 @@ const Register_With_Social_Login = async (req, res, next) => {
   try {
     const Data = {
       email: req.body.email,
-      phone_number: req.body.phone_number,
       user_social_token: req.body.user_social_token,
       user_social_type: req.body.user_social_type,
       user_device_token: req.body.user_device_token,
@@ -446,7 +462,7 @@ const Register_With_Social_Login = async (req, res, next) => {
     };
     if (Data.user_social_type === "Google") {
       const socialUser = await User.create(Data);
-      const expiresIn = socialUser.role === "User" ? "1h" : "23h";
+      const expiresIn = socialUser.role === "Freelancer" ? "1h" : "23h";
       const token = jwt.sign(
         {
           id: socialUser._id,
@@ -479,7 +495,7 @@ const Register_With_Social_Login = async (req, res, next) => {
 
     if (Data.user_social_type === "Apple") {
       const socialUser = await User.create(Data);
-      const expiresIn = socialUser.role === "User" ? "1h" : "23h";
+      const expiresIn = socialUser.role === "Freelancer" ? "1h" : "23h";
       const token = jwt.sign(
         {
           id: socialUser._id,
@@ -510,9 +526,9 @@ const Register_With_Social_Login = async (req, res, next) => {
       }
     }
     
-    if (Data.user_social_type === "Phone") {
+    if (Data.user_social_type === "Facebook") {
       const socialUser = await User.create(Data);
-      const expiresIn = socialUser.role === "User" ? "1h" : "23h";
+      const expiresIn = socialUser.role === "Freelancer" ? "1h" : "23h";
       const token = jwt.sign(
         {
           id: socialUser._id,

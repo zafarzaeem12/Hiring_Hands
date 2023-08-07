@@ -4,6 +4,13 @@ const UserSchema = new mongoose.Schema({
     name: {
         type: String,
     },
+    company_name: {
+        type: String,
+    },
+    category:{
+        type : mongoose.Schema.Types.ObjectId,
+        ref: 'category'
+    },
     email: {
         type: String,
     },
@@ -19,27 +26,16 @@ const UserSchema = new mongoose.Schema({
         type: String,
         // required: true
     },
-    dob: {
+    business_phone_number: {
         type: String,
-       // required: true
-    },
-    address: {
-        type: String,
-    },
-    gender:{
-        type:String,
-        enum : ['Male','Female' , 'Prefer Not to Say'],
-        default: 'Male'
+        // required: true
     },
     role:{
         type:String,
-        enum : ['Admin','User'],
-        default: 'User'
+        enum : ['Client','Freelancer'],
+        default: 'Freelancer'
     },
     state: {
-        type: String,
-    },
-    city: {
         type: String,
     },
     verification_code :{
@@ -95,7 +91,7 @@ const UserSchema = new mongoose.Schema({
     },
     user_social_type:{
         type:String,
-        enum : ['Phone','Google','Apple','none'],
+        enum : ['Facebook','Google','Apple','none'],
         default: 'none'
     }
 },
