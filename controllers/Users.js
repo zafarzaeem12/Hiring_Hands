@@ -132,8 +132,8 @@ const LoginRegisteredUser = async (req, res, next) => {
     } else if (password !== original_password) {
       res.send({ message: "Password Not Matched" });
     } else {
-      if (LoginUser.role === "User" || LoginUser.role === "Admin") {
-        const expiresIn = LoginUser.role === "User" ? "1h" : "23h";
+      if (LoginUser.role === "Client" || LoginUser.role === "Freelancer") {
+        const expiresIn = LoginUser.role === "Freelancer" ? "1h" : "23h";
         const token = jwt.sign(
           {
             id: LoginUser._id,

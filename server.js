@@ -8,7 +8,7 @@ const databaseConnection = require('./database/databaseConnection')
 // app routes start here
 const UserRouter = require('./router/Users')
 const CategoryRouter = require('./router/Category')
-// const TypesRouter = require('./router/Types')
+const PostRouter = require('./router/Posts')
 // const LikedRouter = require('./router/Likeed')
 // const CommentsRouter = require('./router/Comments')
 // const ReportsRouter = require('./router/Report')
@@ -24,7 +24,7 @@ app.use(cors());
 // app routes use here
 app.use("/UserAPI/", UserRouter);
 app.use("/CategoryAPI/", CategoryRouter);
-// app.use("/TypesAPI/", TypesRouter);
+app.use("/PostAPI/", PostRouter);
 // app.use("/LikedAPI/", LikedRouter);
 // app.use("/CommentsAPI/", CommentsRouter);
 // app.use("/ReportAPI/", ReportsRouter);
