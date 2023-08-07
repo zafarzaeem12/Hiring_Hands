@@ -9,12 +9,12 @@ const databaseConnection = require('./database/databaseConnection')
 const UserRouter = require('./router/Users')
 const CategoryRouter = require('./router/Category')
 const PostRouter = require('./router/Posts')
-// const LikedRouter = require('./router/Likeed')
-// const CommentsRouter = require('./router/Comments')
+const NotificationRouter = require('./router/Notification');
+const PaymentRouter = require('./router/Payment')
+const ReviewRouter = require('./router/Review')
 // const ReportsRouter = require('./router/Report')
 // const GoalsRouter = require('./router/Goals')
 // const Save_Types = require('./router/Save_Types')
-// const NotificationRouter = require('./router/Notification');
 // app routes end here
 
 app.use(express.static(path.join(__dirname + '/public')));
@@ -25,12 +25,12 @@ app.use(cors());
 app.use("/UserAPI/", UserRouter);
 app.use("/CategoryAPI/", CategoryRouter);
 app.use("/PostAPI/", PostRouter);
-// app.use("/LikedAPI/", LikedRouter);
-// app.use("/CommentsAPI/", CommentsRouter);
+app.use("/NotificationAPI/", NotificationRouter);
+app.use("/PaymentAPI/", PaymentRouter);
+app.use("/ReviewAPI/", ReviewRouter);
 // app.use("/ReportAPI/", ReportsRouter);
 // app.use("/GoalAPI/", GoalsRouter);
 // app.use("/Save_TypesAPI/", Save_Types);
-// app.use("/NotificationAPI/", NotificationRouter);
 
 // routes end here
 

@@ -19,14 +19,14 @@ try{
 
 const Get_Category = async(req,res,next) => {
 try{
-    const cat = await Category.find();
+    const cat = await Category.find();;
     res.status(200).send({
         total : cat.length,
         message:"Get all categories",
         data : cat
     })
 }catch(err){
-    res.status(404).send({
+    res.status(200).send({
         message:"No categories found",
     })
 }

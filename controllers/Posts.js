@@ -1,4 +1,5 @@
 const Post = require("../model/Posts");
+const Notification = require("../model/Notification")
 const moment = require("moment");
 
 const Create_a_Job = async (req, res, next) => {
@@ -24,13 +25,18 @@ const Create_a_Job = async (req, res, next) => {
       location: req.body.location,
       status: req.body.status || "Waiting Applicant",
     };
-    console.log(":kkkkkk" , Data)
-   
 
-    const create_category = await Post.create(Data);
+    const create_post = await Post.create(Data);
+
+    const { _id  , ...other }  = create_post
+
+    const Datas = {
+        Post_id : _id
+    }
+    await Notification.create(Datas)
     res.status(200).send({
       message: "Job Created Successfully",
-      data: create_category,
+      data: create_post,
     });
   } catch (err) {
     res.status(500).send({
