@@ -93,6 +93,10 @@ const UserSchema = new mongoose.Schema({
         type:String,
         enum : ['Facebook','Google','Apple','none'],
         default: 'none'
+    },
+    job_request:{
+        type : Boolean,
+        default : true
     }
 },
     { timestamps: true }

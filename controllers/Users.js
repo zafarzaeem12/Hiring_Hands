@@ -2,6 +2,7 @@ const User = require("../model/Users");
 const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
+const Review = require("../model/Review");
 
 const Register_New_User = async (req, res, next) => {
   const typed_Email = req.body.email;
@@ -86,11 +87,10 @@ const Complete_Profile = async (req, res, next) => {
         $set: {
           user_image: userAvator,
           name: req.body.name,
-          //company_name: req.body.company_name,
-          //business_phone_number: req.body.business_phone_number,
           phone_number: req.body.phone_number,
           state: req.body.state,
           category: req.body.category,
+          job_request : req.body.job_request,
           user_is_profile_complete: true,
           is_verified: true,
         },
@@ -175,11 +175,40 @@ const VerifyRegisteredUser = async (req, res) => {
     const Id = req.id;
 
     const verified_User = await User.findById(Id);
-    const { password, ...details } = verified_User._doc;
+    const {
+       password,
+       verification_code ,
+       is_verified , 
+       user_is_profile_complete , 
+       user_is_forgot,
+       user_authentication,
+       user_social_token,
+       user_social_type,
+       user_device_token,
+       user_device_type,
+       is_profile_deleted,
+       is_notification,
+       is_Blocked,
+       job_request,
+       createdAt,
+       updatedAt,
+       email,
+       role,
+       category,
+       phone_number,
+       state,
+       __v,
+        ...details } = verified_User._doc;
+
+    const userReviews = await Review.find({rate_on_User_id : Id}).populate({path: 'rated_by_User_id',select:"name user_image" })
+    const adding = userReviews.map((data) => data.rating)
+    const avg =  adding.reduce((acc ,item) => acc + item)
+    const Rating = Number((avg / adding.length).toFixed(1))
+
     res.send({
       message: `${details?.name} Logged in Successfully`,
       status: 200,
-      data: { ...details },
+      data: { ...details , Rating ,userReviews },
     });
   } catch (err) {
     res.send({

@@ -10,6 +10,18 @@ try{
 }
 }
 
+const Your_Attachments = (req,res,next) => {
+    const attachments = req?.files?.chat_attachment?.map((data) =>
+      data?.path?.replace(/\\/g, "/")
+    );
+    const Data = {
+        chat_attachment : attachments
+    }
+
+    res.status(200).send({ data : Data })
+}
+
 module.exports = {
-    Get_Last_Message
+    Get_Last_Message,
+    Your_Attachments
 }

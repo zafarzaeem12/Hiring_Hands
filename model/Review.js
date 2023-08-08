@@ -5,7 +5,11 @@ const ReviewSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref: 'Post'
     },
-    rated_User_id:{
+    rate_on_User_id:{
+        type : mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    rated_by_User_id:{
         type : mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
