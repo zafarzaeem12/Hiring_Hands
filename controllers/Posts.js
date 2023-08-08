@@ -94,7 +94,7 @@ const Get_all_jobs = async (req, res, next) => {
   console.log(req.id);
   try {
     const allFreelancer = await User.findOne({ _id: req.id });
-    const allJobs = await Post.find().select("-applied_For_Jobs");
+    const allJobs = await Post.find({status : 'Waiting Applicant'}).select("-applied_For_Jobs");
     res.status(200).send({
       message: `${allFreelancer.email.split("@").slice(0, 1)} has fetched ${
         allJobs.length
@@ -181,10 +181,35 @@ const Get_one_Post = async (req, res, next) => {
     res.status(500).send({ message: "Post Not Fetched" });
   }
 };
+
+const Assiging_Job = async (req,res,next) => {
+  const id = req.params.id;
+try{
+ const assigned = await Post.updateOne(
+    {_id : id},
+    { $set : {
+      User_id : req.id,
+      _id : id ,
+      status : "In Progress"
+    }},
+    {new : true}
+  )
+
+  res.status(200).send({ 
+    message :"Job Successfully assigned" , 
+    data : assigned
+  })
+}catch(err){
+  res.status(404).send({ 
+    message :"Job not assigned"
+  })
+}
+}
 module.exports = {
   Create_a_Job,
   Get_Employer_Specfic_Jobs,
   Get_all_jobs,
   Applied_For_Job,
   Get_one_Post,
+  Assiging_Job
 };
