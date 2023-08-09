@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const User = require("../model/Users");
 const Notification = require("../model/Notification");
 const moment = require("moment");
+const cron = require("node-cron");
 const Review = require("../model/Review");
 
 const Create_a_Job = async (req, res, next) => {
@@ -16,7 +17,7 @@ const Create_a_Job = async (req, res, next) => {
         .status(404)
         .send({ message: "Your not allowed to Post a Job" });
     }
-    console.log("1234")
+    console.log("1234");
     const Data = {
       title: req.body.title,
       description: req.body.description,
@@ -94,7 +95,9 @@ const Get_Employer_Specfic_Jobs = async (req, res, next) => {
 const Get_all_jobs = async (req, res, next) => {
   try {
     const allFreelancer = await User.findOne({ _id: req.id });
-    const allJobs = await Post.find({status : 'Waiting Applicant'}).select("-applied_For_Jobs");
+    const allJobs = await Post.find({ status: "Waiting Applicant" }).select(
+      "-applied_For_Jobs"
+    );
     res.status(200).send({
       message: `${allFreelancer.email.split("@").slice(0, 1)} has fetched ${
         allJobs.length
@@ -130,148 +133,238 @@ const Applied_For_Job = async (req, res, next) => {
 const Get_one_Post = async (req, res, next) => {
   const postId = req.params.id;
   try {
-    
-
     const data = [
       {
-        '$match': {
-          '_id': new mongoose.Types.ObjectId(postId)
-        }
-      }, {
-        '$lookup': {
-          'from': 'users', 
-          'localField': 'applied_For_Jobs', 
-          'foreignField': '_id', 
-          'as': 'candidates'
-        }
-      }, {
-        '$lookup': {
-          'from': 'reviews', 
-          'localField': 'candidates._id', 
-          'foreignField': 'rate_on_User_id', 
-          'as': 'user_reviews'
-        }
-      }, {
-        '$addFields': {
-          'filtered_value': {
+        $match: {
+          _id: new mongoose.Types.ObjectId(postId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "applied_For_Jobs",
+          foreignField: "_id",
+          as: "candidates",
+        },
+      },
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "candidates._id",
+          foreignField: "rate_on_User_id",
+          as: "user_reviews",
+        },
+      },
+      {
+        $addFields: {
+          filtered_value: {
             $map: {
               input: { $range: [0, { $size: "$candidates" }] },
               as: "index",
               in: {
-                  _id: { $arrayElemAt: ["$candidates._id", "$$index"] },
-                  name: { $arrayElemAt: ["$candidates.name", "$$index"] },
-                  user_image: { $arrayElemAt: ["$candidates.user_image", "$$index"] },
-                  review: { $arrayElemAt: ["$user_reviews.rating", "$$index"] },
-       
+                _id: { $arrayElemAt: ["$candidates._id", "$$index"] },
+                name: { $arrayElemAt: ["$candidates.name", "$$index"] },
+                user_image: {
+                  $arrayElemAt: ["$candidates.user_image", "$$index"],
+                },
+                review: { $arrayElemAt: ["$user_reviews.rating", "$$index"] },
               },
+            },
           },
-          }
         },
-        
-      },{
+      },
+      {
         $addFields: {
-          average_rating: { $avg: "$filtered_value.review" }
-        }
-      }
-    ]
-    const result = await Post.aggregate(data)
-    
+          average_rating: { $avg: "$filtered_value.review" },
+        },
+      },
+    ];
+    const result = await Post.aggregate(data);
+
     res.status(200).send({ message: "Post Data Fetched", data: result });
   } catch (err) {
     res.status(500).send({ message: "Post Not Fetched" });
   }
 };
 
-const Job_Details_For_Freelancer = async (req,res,next) => {
-  const postid = req.params.id
-try{
-  const Post_Details = await Post.findById(postid);
-  res.status(200).send({ data :  Post_Details})
-}catch(err){
-  res.status(404).send({ message : "No Post Found"})
-}
-}
-const Assiging_Job = async (req,res,next) => {
-  const Postid = req.params.id;
-try{
- const assigned = await Post.updateOne(
-    {_id : Postid},
-    { $set : {
-
-      Freelancer_User_id : req.body.Freelancer_User_id,
-      _id : Postid ,
-      status : "In Progress"
-    }},
-    {new : true}
-  )
-
-  res.status(200).send({ 
-    message :"Job Successfully assigned" , 
-    data : assigned
-  })
-}catch(err){
-  res.status(404).send({ 
-    message :"Job not assigned"
-  })
-}
-}
-
-const Is_Job_Completed = async (req,res,next) => {
+const Job_Details_For_Freelancer = async (req, res, next) => {
   const postid = req.params.id;
-  console.log(postid)
-try{
- 
-  const jobDone = await Post.updateOne(
-    {_id : postid},
-    { $set:{
-      Freelancer_User_id : req.body.Freelancer_User_id,
-      _id : postid,
-      status : 'Complete'
+  try {
+    const Post_Details = await Post.findById(postid);
+    res.status(200).send({ data: Post_Details });
+  } catch (err) {
+    res.status(404).send({ message: "No Post Found" });
+  }
+};
+const Assiging_Job = async (req, res, next) => {
+  const Postid = req.params.id;
+  try {
+    const assigned = await Post.updateOne(
+      { _id: Postid },
+      {
+        $set: {
+          Freelancer_User_id: req.body.Freelancer_User_id,
+          _id: Postid,
+          status: "In Progress",
+        },
+      },
+      { new: true }
+    );
 
-    } },
-    {new : true}
-  )
-  const freelancer_Details = await 
-  Post
-  .findOne({ status : 'Complete' })
-  .populate({
-    path : 'Freelancer_User_id' ,
-    select: "user_image name"
-  })
+    res.status(200).send({
+      message: "Job Successfully assigned",
+      data: assigned,
+    });
+  } catch (err) {
+    res.status(404).send({
+      message: "Job not assigned",
+    });
+  }
+};
 
-  var TotalAmount = freelancer_Details.total_hours * Number(freelancer_Details.charges)
+const Is_Job_Completed = async (req, res, next) => {
+  const postid = req.params.id;
+  console.log(postid);
+  try {
+    const jobDone = await Post.updateOne(
+      { _id: postid },
+      {
+        $set: {
+          Freelancer_User_id: req.body.Freelancer_User_id,
+          _id: postid,
+          status: "Complete",
+        },
+      },
+      { new: true }
+    );
+    const freelancer_Details = await Post.findOne({
+      status: "Complete",
+    }).populate({
+      path: "Freelancer_User_id",
+      select: "user_image name",
+    });
 
-  const totalamount = await Post.updateOne(
-    {_id :postid },
-    { $set : {total_amount : TotalAmount}},
-    {new : true}
-  )
-  
-  const letsmy = await Promise.all([jobDone , totalamount ,freelancer_Details])
-const [ Done , total ,freelancer]  = letsmy
-  res.status(200).send({ message : "Job Completed Successfully" , data : freelancer })
-}catch(err){
-  res.status(404).send({ message : "Job not Completed" })
-}
-}
+    var TotalAmount =
+      freelancer_Details.total_hours * Number(freelancer_Details.charges);
 
-const Freelancer_Projects_In_Progree = async (req,res,next) => {
-try{
-  const status_Checked = await Post.find({Freelancer_User_id : req.id})
-  res
-  .status(200)
-  .send({ 
-    message : `You have ${status_Checked.length} Jobs assigned in Progress`,
-    data : status_Checked
-  })
-}catch(err){
-  res
-  .status(404)
-  .send({ 
-    message : `You have no Jobs`,
-  })
-}
-}
+    const totalamount = await Post.updateOne(
+      { _id: postid },
+      { $set: { total_amount: TotalAmount } },
+      { new: true }
+    );
+
+    const letsmy = await Promise.all([
+      jobDone,
+      totalamount,
+      freelancer_Details,
+    ]);
+    const [Done, total, freelancer] = letsmy;
+    res
+      .status(200)
+      .send({ message: "Job Completed Successfully", data: freelancer });
+  } catch (err) {
+    res.status(404).send({ message: "Job not Completed" });
+  }
+};
+
+const Freelancer_Projects_In_Progree = async (req, res, next) => {
+  try {
+    const status_Checked = await Post.find({ Freelancer_User_id: req.id });
+    res.status(200).send({
+      message: `You have ${status_Checked.length} Jobs assigned in Progress`,
+      data: status_Checked,
+    });
+  } catch (err) {
+    res.status(404).send({
+      message: `You have no Jobs`,
+    });
+  }
+};
+
+const Current_Jobs_And_Previous_Jobs_Cron_Job = async (req, res, next) => {
+  try {
+    const data = await Post.find();
+
+    return data.filter((item) => {
+      const start_time = item.start_time.split("T").pop();
+      const start_date = item.start_time.split("T").slice(0, 1).pop();
+      const end_time = item.end_time.split("T").pop();
+      const end_date = item.end_time.split("T").slice(0, 1).pop();
+      const corr_time = new Date();
+      const current_time = moment(corr_time)
+        .format("YYYY-MM-DDThh:mm A")
+        .split("T")
+        .pop();
+      const current_date = moment(corr_time)
+        .format("YYYY-MM-DDThh:mm A")
+        .split("T")
+        .slice(0, 1)
+        .pop();
+
+      // console.log(
+      //   "current_time",
+      //   current_time,
+      //   "start_time",
+      //   start_time,
+      //   "current_date",
+      //   current_date,
+      //   "start_date",
+      //   start_date,
+      //   "end_time",
+      //   end_time,
+      //   "end_date",
+      //   end_date,
+      //   "============conidtion================",
+      //   start_time <= current_time &&
+      //     start_date <= current_date &&
+      //     end_time <= current_time &&
+      //     end_date <= current_date
+      // );
+
+      if (
+        start_time <= current_time &&
+        start_date <= current_date &&
+        end_time <= current_time &&
+        end_date <= current_date &&
+        item.status === 'Complete'
+      ) {
+        console.log("=======Previously=========>");
+        return data;
+      }
+
+       else if (
+        start_time <= current_time &&
+        start_date <= current_date &&
+        end_time <= current_time &&
+        end_date <= current_date &&
+        item.status === 'In Progress' ||
+        item.status === 'Waiting Applicant'
+
+        ){
+          console.log("=======Currently=========>")
+          return data
+        }else{
+          console.log('object')
+        }
+    });
+  } catch (err) {}
+};
+
+const task = cron.schedule(
+  "* * * * *",
+  async () => {
+    await Current_Jobs_And_Previous_Jobs_Cron_Job();
+
+    console.log(
+      "Current_Jobs_And_Previous_Jobs_Cron_Job()",
+      await Current_Jobs_And_Previous_Jobs_Cron_Job()
+    );
+  },
+  {
+    scheduled: false, // This will prevent the immediate execution of the task
+  }
+);
+task.start();
 module.exports = {
   Create_a_Job,
   Get_Employer_Specfic_Jobs,
@@ -281,5 +374,5 @@ module.exports = {
   Assiging_Job,
   Is_Job_Completed,
   Job_Details_For_Freelancer,
-  Freelancer_Projects_In_Progree
+  Freelancer_Projects_In_Progree,
 };

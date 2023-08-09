@@ -21,6 +21,8 @@ router.get('/getpost/:id' , auth , Get_one_Post);
 router.put('/accept_job/:id' , auth ,File.user  , Assiging_Job);
 router.put('/complete_job/:id' , auth ,File.user  , Is_Job_Completed);
 router.get('/postdetails/:id' , auth , Job_Details_For_Freelancer );
-router.get('/in_progress_status' , auth ,Freelancer_Projects_In_Progree)
+router.get('/in_progress_status' , auth ,Freelancer_Projects_In_Progree);
+
+
 
 module.exports = router
