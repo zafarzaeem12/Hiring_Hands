@@ -7,6 +7,7 @@ const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 const databaseConnection = require('./database/databaseConnection')
 const { Sending_Messages , Getting_Messages } = require('./utils/chats')
+const { Get_all_jobs } = require('./utils/posts')
 // app routes start here
 const UserRouter = require('./router/Users')
 const CategoryRouter = require('./router/Category')
@@ -77,6 +78,22 @@ io.on("connection", (socket) => {
       });
     });
   });
+
+  socket.on("Get_all_jobs", function (object) {
+    const  in_User = object._id
+   
+    const room = `room person1 ${in_User} and person ${in_User} `;
+    socket.join(room);
+
+    Get_all_jobs(object, async function (response) {
+      // console.log("response",response)
+      io.to(room).emit("get_all_jobs", {
+        object_type: "jobs",
+        data: response,
+      });
+    });
+  });
+
 })
 
 http.listen(port, () => {

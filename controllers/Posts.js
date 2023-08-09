@@ -92,7 +92,6 @@ const Get_Employer_Specfic_Jobs = async (req, res, next) => {
 };
 
 const Get_all_jobs = async (req, res, next) => {
-  console.log(req.id);
   try {
     const allFreelancer = await User.findOne({ _id: req.id });
     const allJobs = await Post.find({status : 'Waiting Applicant'}).select("-applied_For_Jobs");
