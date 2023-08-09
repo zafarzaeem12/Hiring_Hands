@@ -4,15 +4,19 @@ const Earning = require('../model/Earning');
 const moment = require('moment')
 
 const Get_Earning = async (req,res,next) => {
+    
+    const User_Id = req.id
 try{
-    const data =  
-    await Earning
-    .find({ Freelancer_User_id : req.id})
-    .populate('Post_id')
+    const data = await 
+    Earning
+    .find({ Freelancer_User_id: User_Id })
+    .populate({ path :'Post_id' , select : "title start_time"})
 
+    const totalearning = data.map((item) => item?.earning).reduce((acc,item) => acc + item)
+    
     res.status(200).send({
         message : "Your Earning History",
-        data : data
+        data : {data , totalearning}
     })
 
 }catch(err){

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const ReviewSchema = new mongoose.Schema({
     Post_id:{
         type : mongoose.Schema.Types.ObjectId,
-        ref: 'Post'
+        ref: 'Posts'
     },
     Freelancer_User_id:{
         type : mongoose.Schema.Types.ObjectId,

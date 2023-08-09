@@ -5,7 +5,7 @@ const {
     Get_Earning
 } = require('../controllers/Earning')
 
-router.get('/history' ,auth , Get_Earning);
+router.get('/earning' ,auth , File.user , Get_Earning);
 
 
 

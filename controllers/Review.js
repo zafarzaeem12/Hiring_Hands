@@ -4,6 +4,7 @@ const Post = require('../model/Posts')
 const Create_a_Review = async (req,res,next) => {
 try{
 
+    
     const Data = {
         Post_id : req.body.Post_id,
         Freelancer_User_id : req.body.Freelancer_User_id,
@@ -11,11 +12,13 @@ try{
         rating : req.body.rating,
         description  : req.body.description
     }
-
+    
+    const forearnings = await Post.findById( req.body.Post_id ).select('total_amount -_id')
     
     const Datas = {
         Freelancer_User_id : Data.Freelancer_User_id,
-        Post_id : Data.Post_id
+        Post_id : Data.Post_id,
+        earning : forearnings.total_amount
 
     }
     const rating = await Review.create(Data)

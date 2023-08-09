@@ -8,9 +8,9 @@ const EarningSchema = new mongoose.Schema({
     },
     Post_id:{
         type : mongoose.Schema.Types.ObjectId,
-        ref: 'Post'
+        ref: 'Posts'
     },
-    total_earning:{
+    earning:{
         type: Number,
         default : 0
     }
