@@ -12,10 +12,10 @@ const UserRouter = require('./router/Users')
 const CategoryRouter = require('./router/Category')
 const PostRouter = require('./router/Posts')
 const NotificationRouter = require('./router/Notification');
-const PaymentRouter = require('./router/Payment')
+const CardRouter = require('./router/Card')
 const ReviewRouter = require('./router/Review')
 const ChatRouter = require('./router/Chats')
-// const ReportsRouter = require('./router/Report')
+const EarningRouter = require('./router/Earning')
 // const GoalsRouter = require('./router/Goals')
 // const Save_Types = require('./router/Save_Types')
 // app routes end here
@@ -29,10 +29,10 @@ app.use("/UserAPI/", UserRouter);
 app.use("/CategoryAPI/", CategoryRouter);
 app.use("/PostAPI/", PostRouter);
 app.use("/NotificationAPI/", NotificationRouter);
-app.use("/PaymentAPI/", PaymentRouter);
+app.use("/CardAPI/", CardRouter);
 app.use("/ReviewAPI/", ReviewRouter);
 app.use("/ChatAPI/", ChatRouter);
-// app.use("/GoalAPI/", GoalsRouter);
+app.use("/EarningAPI/", EarningRouter);
 // app.use("/Save_TypesAPI/", Save_Types);
 
 // routes end here

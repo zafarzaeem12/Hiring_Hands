@@ -16,6 +16,10 @@ const PostSchema = new mongoose.Schema({
     start_time :{
         type : String
     },
+    total_amount :{
+        type :Number,
+        default : 0
+    },
     end_time :{
         type : String
     },
@@ -32,6 +36,10 @@ const PostSchema = new mongoose.Schema({
         default: 'Waiting Applicant'
     },
     User_id:{
+        type : mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    Freelancer_User_id:{
         type : mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },

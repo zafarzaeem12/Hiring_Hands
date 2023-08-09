@@ -11,11 +11,12 @@ const Create_a_Job = async (req, res, next) => {
       path: "User_id",
       select: "role",
     });
-    if (check_role.User_id.role === "Freelancer") {
+    if (check_role && check_role.User_id.role === "Freelancer") {
       return res
         .status(404)
         .send({ message: "Your not allowed to Post a Job" });
     }
+    console.log("1234")
     const Data = {
       title: req.body.title,
       description: req.body.description,
@@ -182,14 +183,24 @@ const Get_one_Post = async (req, res, next) => {
   }
 };
 
+const Job_Details_For_Freelancer = async (req,res,next) => {
+  const postid = req.params.id
+try{
+  const Post_Details = await Post.findById(postid);
+  res.status(200).send({ data :  Post_Details})
+}catch(err){
+  res.status(404).send({ message : "No Post Found"})
+}
+}
 const Assiging_Job = async (req,res,next) => {
-  const id = req.params.id;
+  const Postid = req.params.id;
 try{
  const assigned = await Post.updateOne(
-    {_id : id},
+    {_id : Postid},
     { $set : {
-      User_id : req.id,
-      _id : id ,
+
+      Freelancer_User_id : req.body.Freelancer_User_id,
+      _id : Postid ,
       status : "In Progress"
     }},
     {new : true}
@@ -205,11 +216,71 @@ try{
   })
 }
 }
+
+const Is_Job_Completed = async (req,res,next) => {
+  const postid = req.params.id;
+  console.log(postid)
+try{
+ 
+  const jobDone = await Post.updateOne(
+    {_id : postid},
+    { $set:{
+      Freelancer_User_id : req.body.Freelancer_User_id,
+      _id : postid,
+      status : 'Complete'
+
+    } },
+    {new : true}
+  )
+  const freelancer_Details = await 
+  Post
+  .findOne({ status : 'Complete' })
+  .populate({
+    path : 'Freelancer_User_id' ,
+    select: "user_image name"
+  })
+
+  var TotalAmount = freelancer_Details.total_hours * Number(freelancer_Details.charges)
+
+  const totalamount = await Post.updateOne(
+    {_id :postid },
+    { $set : {total_amount : TotalAmount}},
+    {new : true}
+  )
+  
+  const letsmy = await Promise.all([jobDone , totalamount ,freelancer_Details])
+const [ Done , total ,freelancer]  = letsmy
+  res.status(200).send({ message : "Job Completed Successfully" , data : freelancer })
+}catch(err){
+  res.status(404).send({ message : "Job not Completed" })
+}
+}
+
+const Freelancer_Projects_In_Progree = async (req,res,next) => {
+try{
+  const status_Checked = await Post.find({Freelancer_User_id : req.id})
+  res
+  .status(200)
+  .send({ 
+    message : `You have ${status_Checked.length} Jobs assigned in Progress`,
+    data : status_Checked
+  })
+}catch(err){
+  res
+  .status(404)
+  .send({ 
+    message : `You have no Jobs`,
+  })
+}
+}
 module.exports = {
   Create_a_Job,
   Get_Employer_Specfic_Jobs,
   Get_all_jobs,
   Applied_For_Job,
   Get_one_Post,
-  Assiging_Job
+  Assiging_Job,
+  Is_Job_Completed,
+  Job_Details_For_Freelancer,
+  Freelancer_Projects_In_Progree
 };

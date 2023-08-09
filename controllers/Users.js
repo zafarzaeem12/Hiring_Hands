@@ -173,7 +173,6 @@ const LoginRegisteredUser = async (req, res, next) => {
 const VerifyRegisteredUser = async (req, res) => {
   try {
     const Id = req.id;
-
     const verified_User = await User.findById(Id);
     const {
        password,
@@ -200,7 +199,7 @@ const VerifyRegisteredUser = async (req, res) => {
        __v,
         ...details } = verified_User._doc;
 
-    const userReviews = await Review.find({rate_on_User_id : Id}).populate({path: 'rated_by_User_id',select:"name user_image" })
+    const userReviews = await Review.find({Freelancer_User_id : Id}).populate({path: 'rated_by_User_id',select:"name user_image" })
     const adding = userReviews.map((data) => data.rating)
     const avg =  adding.reduce((acc ,item) => acc + item)
     const Rating = Number((avg / adding.length).toFixed(1))
