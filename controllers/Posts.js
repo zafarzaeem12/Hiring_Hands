@@ -203,6 +203,7 @@ const Assiging_Job = async (req, res, next) => {
       { _id: Postid },
       {
         $set: {
+          start_time :  moment().format('YYYY-MM-DD HH:mm:ss'),
           Freelancer_User_id: req.body.Freelancer_User_id,
           _id: Postid,
           status: "In Progress",
@@ -233,6 +234,7 @@ const Is_Job_Completed = async (req, res, next) => {
           Freelancer_User_id: req.body.Freelancer_User_id,
           _id: postid,
           status: "Complete",
+          end_time :  moment().format('YYYY-MM-DD HH:mm:ss'),
         },
       },
       { new: true }
@@ -249,7 +251,8 @@ const Is_Job_Completed = async (req, res, next) => {
 
     const totalamount = await Post.updateOne(
       { _id: postid },
-      { $set: { total_amount: TotalAmount } },
+      { $set: { 
+        total_amount: TotalAmount } },
       { new: true }
     );
 
@@ -286,46 +289,7 @@ const Current_Jobs_And_Previous_Jobs_Cron_Job = async (req, res, next) => {
     const data = await Post.find();
 
     return data.filter((item) => {
-      const start_time = item.start_time.split("T").pop();
-      const start_date = item.start_time.split("T").slice(0, 1).pop();
-      const end_time = item.end_time.split("T").pop();
-      const end_date = item.end_time.split("T").slice(0, 1).pop();
-      const corr_time = new Date();
-      const current_time = moment(corr_time)
-        .format("YYYY-MM-DDThh:mm A")
-        .split("T")
-        .pop();
-      const current_date = moment(corr_time)
-        .format("YYYY-MM-DDThh:mm A")
-        .split("T")
-        .slice(0, 1)
-        .pop();
-
-      // console.log(
-      //   "current_time",
-      //   current_time,
-      //   "start_time",
-      //   start_time,
-      //   "current_date",
-      //   current_date,
-      //   "start_date",
-      //   start_date,
-      //   "end_time",
-      //   end_time,
-      //   "end_date",
-      //   end_date,
-      //   "============conidtion================",
-      //   start_time <= current_time &&
-      //     start_date <= current_date &&
-      //     end_time <= current_time &&
-      //     end_date <= current_date
-      // );
-
       if (
-        start_time <= current_time &&
-        start_date <= current_date &&
-        end_time <= current_time &&
-        end_date <= current_date &&
         item.status === 'Complete'
       ) {
         console.log("=======Previously=========>");
@@ -333,38 +297,37 @@ const Current_Jobs_And_Previous_Jobs_Cron_Job = async (req, res, next) => {
       }
 
        else if (
-        start_time <= current_time &&
-        start_date <= current_date &&
-        end_time <= current_time &&
-        end_date <= current_date &&
         item.status === 'In Progress' ||
         item.status === 'Waiting Applicant'
 
         ){
           console.log("=======Currently=========>")
           return data
-        }else{
+        }
+        else{
           console.log('object')
         }
     });
   } catch (err) {}
 };
 
-const task = cron.schedule(
-  "* * * * *",
-  async () => {
-    await Current_Jobs_And_Previous_Jobs_Cron_Job();
+// const task = cron.schedule(
+//   "* * * * *",
+//   async () => {
+//     await Current_Jobs_And_Previous_Jobs_Cron_Job();
 
-    console.log(
-      "Current_Jobs_And_Previous_Jobs_Cron_Job()",
-      await Current_Jobs_And_Previous_Jobs_Cron_Job()
-    );
-  },
-  {
-    scheduled: false, // This will prevent the immediate execution of the task
-  }
-);
-task.start();
+//     console.log(
+//       "Current_Jobs_And_Previous_Jobs_Cron_Job()",
+//       await Current_Jobs_And_Previous_Jobs_Cron_Job()
+//     );
+//   },
+//   {
+//     scheduled: false, // This will prevent the immediate execution of the task
+//   }
+// );
+// task.start();
+
+
 module.exports = {
   Create_a_Job,
   Get_Employer_Specfic_Jobs,
