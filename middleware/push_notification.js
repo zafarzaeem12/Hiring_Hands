@@ -15,7 +15,8 @@ const push_notifications = (notification_obj) => {
         body: notification_obj.body,
         notification_type: notification_obj.notification_type,
         vibrate: notification_obj.vibrate,
-        sound: notification_obj.sound
+        sound: notification_obj.sound,
+        message : notification_obj.sender_message
         //   type: notification_obj.type
       },
       data: {  //you can send only notification or only data(or include both)

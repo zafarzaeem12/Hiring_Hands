@@ -11,7 +11,6 @@ const Sending_Messages = async (object , callback) => {
         sender_Id: object.sender_Id,
         reciever_Id: object.reciever_Id,
       };
-     
       const chats = await Chats.create(messages);
 
       callback(chats)

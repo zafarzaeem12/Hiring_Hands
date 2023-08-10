@@ -456,8 +456,6 @@ try{
 }
 }
 
-
-
 const Current_Jobs_And_Previous_Jobs_Cron_Job = async (req, res, next) => {
   try {
     const data = await Post.find();
