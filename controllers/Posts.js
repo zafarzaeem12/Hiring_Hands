@@ -196,6 +196,7 @@ const Job_Details_For_Freelancer = async (req, res, next) => {
     res.status(404).send({ message: "No Post Found" });
   }
 };
+
 const Assiging_Job = async (req, res, next) => {
   const Postid = req.params.id;
   try {
