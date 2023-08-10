@@ -14,14 +14,36 @@ const PostSchema = new mongoose.Schema({
         type : Number
     },
     start_time :{
-        type : String
+        type : String,
+        default : ""
+    },
+    end_time :{
+        type : String,
+        default : ""
+    },
+    freelancer_start_time :{
+        type : String,
+        default : ""
+    },
+    freelancer_job_accepted:{
+        type : Boolean,
+        default : false
+    },
+    freelancer_end_time :{
+        type : String,
+        default : ""
+    },
+    client_start_time :{
+        type : String,
+        default : ""
+    },
+    client_end_time :{
+        type : String,
+        default : ""
     },
     total_amount :{
         type :Number,
         default : 0
-    },
-    end_time :{
-        type : String
     },
     location: {
         type: {
@@ -49,7 +71,11 @@ const PostSchema = new mongoose.Schema({
             ref: 'User'
           }
     
-    ]
+    ],
+    is_Post_Deleted : {
+        type : Boolean,
+        default : false
+    }
         
     
 },

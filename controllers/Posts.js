@@ -95,7 +95,7 @@ const Get_Employer_Specfic_Jobs = async (req, res, next) => {
 const Get_all_jobs = async (req, res, next) => {
   try {
     const allFreelancer = await User.findOne({ _id: req.id });
-    const allJobs = await Post.find({ status: "Waiting Applicant" }).select(
+    const allJobs = await Post.find( {$or : [{ status: "Waiting Applicant"  },{is_Post_Deleted : false}]} ).select(
       "-applied_For_Jobs"
     );
     res.status(200).send({
@@ -203,7 +203,7 @@ const Assiging_Job = async (req, res, next) => {
       { _id: Postid },
       {
         $set: {
-          start_time :  moment().format('YYYY-MM-DD HH:mm:ss'),
+          client_start_time :  moment().format('YYYY-MM-DDThh:mm A'),
           Freelancer_User_id: req.body.Freelancer_User_id,
           _id: Postid,
           status: "In Progress",
@@ -211,11 +211,34 @@ const Assiging_Job = async (req, res, next) => {
       },
       { new: true }
     );
+    
+    const { acknowledged , modifiedCount}  = assigned
 
-    res.status(200).send({
-      message: "Job Successfully assigned",
-      data: assigned,
-    });
+    if(acknowledged  === true && modifiedCount === 1) {
+      const assigned_Freelancer = 
+      await Post.findOne({ 
+        Freelancer_User_id : req.body.Freelancer_User_id 
+       }).select("title description start_time end_time charges location Freelancer_User_id")
+  
+      const Data = {
+        Post_id : assigned_Freelancer._id,
+        title  : assigned_Freelancer.title,
+        description :  assigned_Freelancer.description,
+        start_time : assigned_Freelancer.start_time,
+        end_time : assigned_Freelancer.end_time,
+        charges : assigned_Freelancer.charges,
+        User_id :assigned_Freelancer.User_id,
+        Freelancer_User_id :assigned_Freelancer.Freelancer_User_id
+      }
+      await Notification.create(Data)
+      
+  
+      res.status(200).send({
+        message: "Job Successfully assigned",
+        data: assigned_Freelancer,
+      });
+    }
+
   } catch (err) {
     res.status(404).send({
       message: "Job not assigned",
@@ -223,9 +246,105 @@ const Assiging_Job = async (req, res, next) => {
   }
 };
 
+const Freelancer_Get_Jobs = async (req,res,next) => {
+  const user_id = req.id
+  console.log(user_id)
+  try{
+    const setted = await Post.find({Freelancer_User_id : user_id });
+    res
+    .status(200)
+    .send({ 
+      message : `you have ${setted.length} jobs assigned` , 
+      data :setted
+    })
+  }catch(err){
+   res.status(404).send({
+    message : "No job assigned"
+   })
+  }
+}
+
+const Accepting_Job = async (req,res,next) => {
+  const post_id = req.params.id
+  console.log(post_id)
+try{
+
+  const accepted = await Post.updateOne(
+    { _id: post_id },
+    {
+      $set: {
+        freelancer_job_accepted : req.body.freelancer_job_accepted
+      },
+    },
+    { new: true }
+  );
+  const { acknowledged , modifiedCount}  = accepted
+
+  if(acknowledged === true && modifiedCount === 1){
+
+    const data_accepted = await Post.updateOne(
+      { _id: post_id },
+      {
+        $set: {
+          Freelancer_User_id: req.body.Freelancer_User_id,
+          freelancer_start_time :  moment().format('YYYY-MM-DDThh:mm A'),
+          _id: post_id,
+          status: "In Progress",
+        },
+      },
+      { new: true }
+    );
+    
+    const { acknowledged , modifiedCount}  = data_accepted
+    if(acknowledged === true && modifiedCount === 1){
+      res.status(200).send({ message : "Freelancer Job Accepted and start working" })
+    }
+  }
+
+}catch(err){
+console.log(err)
+}
+}
+
+const Finishing_Job = async (req,res,next) => {
+  const post_id = req.params.id
+  try{
+    await Post.updateOne(
+      {_id : post_id},
+      { $set:{
+        Freelancer_User_id: req.body.Freelancer_User_id,
+        freelancer_end_time :  moment().format('YYYY-MM-DDThh:mm A'),
+        _id: post_id,
+      }},
+      {new : true}
+    )
+
+   let assigned_Freelancer = await Post.findOne({ 
+      Freelancer_User_id : req.body.Freelancer_User_id 
+     }).select("title description start_time end_time charges location Freelancer_User_id")
+
+    const Data = {
+      message : "Freelancer Finsish this Job",
+      Post_id : assigned_Freelancer._id,
+      title  : assigned_Freelancer.title,
+      description :  assigned_Freelancer.description,
+      start_time : assigned_Freelancer.start_time,
+      end_time : assigned_Freelancer.end_time,
+      charges : assigned_Freelancer.charges,
+      User_id :assigned_Freelancer.User_id,
+      Freelancer_User_id :assigned_Freelancer.Freelancer_User_id
+    }
+    await Notification.create(Data)
+
+    res.status(200).send({ message : `Freelancer Finsish this Job`})
+  }catch(err){
+    console.log(err)
+  }
+}
+
 const Is_Job_Completed = async (req, res, next) => {
   const postid = req.params.id;
-  console.log(postid);
+  console.log(postid)
   try {
     const jobDone = await Post.updateOne(
       { _id: postid },
@@ -234,7 +353,7 @@ const Is_Job_Completed = async (req, res, next) => {
           Freelancer_User_id: req.body.Freelancer_User_id,
           _id: postid,
           status: "Complete",
-          end_time :  moment().format('YYYY-MM-DD HH:mm:ss'),
+          client_end_time :  moment().format('YYYY-MM-DDThh:mm A'),
         },
       },
       { new: true }
@@ -246,8 +365,15 @@ const Is_Job_Completed = async (req, res, next) => {
       select: "user_image name",
     });
 
-    var TotalAmount =
-      freelancer_Details.total_hours * Number(freelancer_Details.charges);
+   
+
+    const {freelancer_start_time  , freelancer_end_time} = freelancer_Details
+    const endDates = new Date (freelancer_end_time)
+    const startDates = new Date (freelancer_start_time)
+    const u = endDates - startDates
+    const job_total_hours = (u / (1000 * 60 * 60)).toFixed(2)
+      
+    const TotalAmount = job_total_hours * Number(freelancer_Details.charges);
 
     const totalamount = await Post.updateOne(
       { _id: postid },
@@ -255,6 +381,23 @@ const Is_Job_Completed = async (req, res, next) => {
         total_amount: TotalAmount } },
       { new: true }
     );
+
+    let assigned_Freelancer = await Post.findOne({ 
+      Freelancer_User_id : req.body.Freelancer_User_id 
+     }).select("title description start_time end_time charges location Freelancer_User_id")
+
+    const Data = {
+      message : `${assigned_Freelancer.title} Job Completed`,
+      Post_id : assigned_Freelancer._id,
+      title  : assigned_Freelancer.title,
+      description :  assigned_Freelancer.description,
+      start_time : assigned_Freelancer.start_time,
+      end_time : assigned_Freelancer.end_time,
+      charges : assigned_Freelancer.charges,
+      User_id :assigned_Freelancer.User_id,
+      Freelancer_User_id :assigned_Freelancer.Freelancer_User_id
+    }
+    await Notification.create(Data)
 
     const letsmy = await Promise.all([
       jobDone,
@@ -284,6 +427,36 @@ const Freelancer_Projects_In_Progree = async (req, res, next) => {
   }
 };
 
+const Job_Post_Soft_Deleted = async (req,res,next) => {
+try{
+  const soft_Deleted = await Post.find();
+
+ return soft_Deleted.filter(async(data) => {
+
+    const corr_time = new Date()
+    const current_date  = moment(corr_time).format('YYYY-MM-DDThh:mm A')
+ 
+    if(current_date > data.end_time){
+      console.log('=============Soft Deleted=======>')
+      return uiop =  await Post.updateMany(
+        {_id : data.id},
+        { $set : { is_Post_Deleted : true  }},
+        { new : true }
+      )
+ 
+    }
+    
+    return data
+  
+  })
+
+}catch(err){
+  console.log(err)
+}
+}
+
+
+
 const Current_Jobs_And_Previous_Jobs_Cron_Job = async (req, res, next) => {
   try {
     const data = await Post.find();
@@ -311,14 +484,17 @@ const Current_Jobs_And_Previous_Jobs_Cron_Job = async (req, res, next) => {
   } catch (err) {}
 };
 
+
+
 // const task = cron.schedule(
 //   "* * * * *",
 //   async () => {
-//     await Current_Jobs_And_Previous_Jobs_Cron_Job();
-
+//   await Current_Jobs_And_Previous_Jobs_Cron_Job();
+//     await Job_Post_Soft_Deleted()
 //     console.log(
 //       "Current_Jobs_And_Previous_Jobs_Cron_Job()",
-//       await Current_Jobs_And_Previous_Jobs_Cron_Job()
+//     await Current_Jobs_And_Previous_Jobs_Cron_Job(),
+//       await Job_Post_Soft_Deleted()
 //     );
 //   },
 //   {
@@ -335,6 +511,9 @@ module.exports = {
   Applied_For_Job,
   Get_one_Post,
   Assiging_Job,
+  Freelancer_Get_Jobs,
+  Accepting_Job,
+  Finishing_Job,
   Is_Job_Completed,
   Job_Details_For_Freelancer,
   Freelancer_Projects_In_Progree,
