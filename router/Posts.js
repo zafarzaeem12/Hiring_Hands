@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const auth = require('../middleware/Authentication');
+const socket_auth = require('../middleware/Socket_Authentication')
 const File = require('../middleware/ImagesandVideosData');
 const { 
-    Create_a_Job ,
+    Create_a_Jobs ,
     Get_Employer_Specfic_Jobs,
     Get_all_jobs,
     Applied_For_Job,
@@ -16,7 +17,7 @@ const {
     Freelancer_Projects_In_Progree
 } = require('../controllers/Posts')
 
-router.post('/create' ,auth , Create_a_Job);
+router.post('/create' ,auth , Create_a_Jobs);
 router.get('/get' , auth  , Get_Employer_Specfic_Jobs );
 router.get('/gets' , auth , Get_all_jobs);
 router.put('/applied_job/:id' , auth , Applied_For_Job);

@@ -5,10 +5,10 @@ const Notification = require("../model/Notification");
 const moment = require("moment");
 const cron = require("node-cron");
 const Review = require("../model/Review");
-
-const Create_a_Job = async (req, res, next) => {
+const io = require("socket.io")();
+const Create_a_Jobs = async (object,callback) => {
   try {
-    const check_role = await Post.findOne({ User_id: req?.id }).populate({
+    const check_role = await Post.findOne({ User_id: object?._id }).populate({
       path: "User_id",
       select: "role",
     });
@@ -17,17 +17,17 @@ const Create_a_Job = async (req, res, next) => {
         .status(404)
         .send({ message: "Your not allowed to Post a Job" });
     }
-    console.log("1234");
+
     const Data = {
-      title: req.body.title,
-      description: req.body.description,
-      charges: req.body.charges,
-      User_id: req.id,
-      total_hours: req.body.total_hours,
-      start_time: moment(req.body.start_time).format("YYYY-MM-DDThh:mm A"),
-      end_time: moment(req.body.end_time).format("YYYY-MM-DDThh:mm A"),
-      location: req.body.location,
-      status: req.body.status || "Waiting Applicant",
+      title: object.title,
+      description: object.description,
+      charges: object.charges,
+      User_id: object.id,
+      total_hours: object.total_hours,
+      start_time: moment(object.start_time).format("YYYY-MM-DDThh:mm A"),
+      end_time: moment(object.end_time).format("YYYY-MM-DDThh:mm A"),
+      location: object.location,
+      status: object.status || "Waiting Applicant",
     };
 
     const create_post = await Post.create(Data);
@@ -38,14 +38,16 @@ const Create_a_Job = async (req, res, next) => {
       Post_id: _id,
     };
     await Notification.create(Datas);
-    res.status(200).send({
-      message: "Job Created Successfully",
-      data: create_post,
-    });
+    io.emit('get_all_jobss',  create_post );
+    callback(create_post)
+    // res.status(200).send({
+    //   message: "Job Created Successfully",
+    //   data: create_post,
+    // });
   } catch (err) {
-    res.status(500).send({
-      message: "Job not Created",
-    });
+    // res.status(500).send({
+    //   message: "Job not Created",
+    // });
   }
 };
 
@@ -504,7 +506,7 @@ const Current_Jobs_And_Previous_Jobs_Cron_Job = async (req, res, next) => {
 
 
 module.exports = {
-  Create_a_Job,
+  Create_a_Jobs,
   Get_Employer_Specfic_Jobs,
   Get_all_jobs,
   Applied_For_Job,

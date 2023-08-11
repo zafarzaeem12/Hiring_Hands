@@ -8,7 +8,9 @@ const io = require("socket.io")(http);
 const databaseConnection = require('./database/databaseConnection')
 const push_notifications = require('./middleware/push_notification')
 const { Sending_Messages , Getting_Messages } = require('./utils/chats')
-const { Get_all_jobs } = require('./utils/posts')
+const { Get_all_jobs , Create_a_Job } = require('./utils/posts')
+const { Create_a_Jobs } = require('./controllers/Posts')
+
 // app routes start here
 const UserRouter = require('./router/Users')
 const CategoryRouter = require('./router/Category')
@@ -132,12 +134,30 @@ console.log("checking....", notification_obj_receiver)
     socket.join(room);
 
     Get_all_jobs(object, async function (response) {
-      // console.log("response",response)
-      io.to(room).emit("get_all_jobs", {
+      
+      io.to(room).emit("get_all_jobss", {
         object_type: "jobs",
         data: response,
       });
     });
+  });
+ 
+  socket.on("Create_a_Jobs", function (object) {
+    const  in_User = "64d1fe191a1b3c01e1cb059f"
+   
+    const room = `room person1 ${in_User} and person ${in_User} `;
+     socket.join(room);
+
+    Create_a_Jobs(object, async function (response) {
+      
+      io.to(room).emit("get_all_jobss", {
+        object_type: "jobs",
+        data: response,
+      });
+    });
+
+
+
   });
 
 })
