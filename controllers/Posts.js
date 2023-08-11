@@ -39,7 +39,7 @@ const Create_a_Jobs = async (object,callback) => {
     };
     await Notification.create(Datas);
     io.emit('get_all_jobss',  create_post );
-    callback(create_post)
+    //callback(create_post)
     // res.status(200).send({
     //   message: "Job Created Successfully",
     //   data: create_post,

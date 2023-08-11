@@ -143,17 +143,19 @@ console.log("checking....", notification_obj_receiver)
   });
  
   socket.on("Create_a_Jobs", function (object) {
-    const  in_User = "64d1fe191a1b3c01e1cb059f"
+    const  in_User = object._id
    
     const room = `room person1 ${in_User} and person ${in_User} `;
      socket.join(room);
 
     Create_a_Jobs(object, async function (response) {
-      
-      io.to(room).emit("get_all_jobss", {
-        object_type: "jobs",
-        data: response,
-      });
+      io.to(room)
+      return response;
+      // io.to(room).emit("get_all_jobss", {
+      //   object_type: "jobs",
+      //   data: response,
+      // });
+
     });
 
 
