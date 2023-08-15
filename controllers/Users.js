@@ -175,7 +175,7 @@ const VerifyRegisteredUser = async (req, res) => {
   try {
     const Id = req.id;
     const verified_User = await User.findById(Id);
-  
+   
     const {
        password,
        verification_code ,
@@ -193,31 +193,24 @@ const VerifyRegisteredUser = async (req, res) => {
        job_request,
        createdAt,
        updatedAt,
-       role,
-       category,
-       phone_number,
-       state,
-       __v,
         ...details } = verified_User._doc;
-        console.log(details )
-
+    if(details){
+      return res.status(200).send({
+        message: ` Logged in Successfully`,
+        data:  details ,
+      })
+    } 
+    
     const userReviews = await Review.find({Freelancer_User_id : Id}).populate({path: 'rated_by_User_id',select:"name user_image" })
-    const adding = userReviews.map((data) => data.rating)
-    const avg =  adding.reduce((acc ,item) => acc + item)
-    const Rating = Number((avg / adding.length).toFixed(1))
-    // userReviews ?
-
-    // res.send({
-    //   message: `Logged in Successfully`,
-    //   status: 200,
-    //   data: { ...details , ...userReviews , Rating },
-    // })
-    // : 
-    // res.send({
-    //   message: `Logged in Successfully`,
-    //   status: 200,
-    //   data: { ...details  },
-    // });
+      const adding = userReviews.map((data) => data.rating)
+      const avg =  adding.reduce((acc ,item) => acc + item)
+      const Rating = Number((avg / adding.length).toFixed(1))
+      return res.send({
+        message: `Logged in Successfully`,
+        status: 200,
+        data: { ...details , Rating ,userReviews },
+      });
+ 
   } catch (err) {
     res.send({
       message: "Login Failed!",

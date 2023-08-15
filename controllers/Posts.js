@@ -22,7 +22,7 @@ const Create_a_Jobs = async (object,callback) => {
       title: object.title,
       description: object.description,
       charges: object.charges,
-      User_id: object._id,
+      User_id: object.id,
       total_hours: object.total_hours,
       start_time: moment(object.start_time).format("YYYY-MM-DDThh:mm A"),
       end_time: moment(object.end_time).format("YYYY-MM-DDThh:mm A"),
@@ -53,7 +53,6 @@ const Create_a_Jobs = async (object,callback) => {
 
 const Get_Employer_Specfic_Jobs = async (req, res, next) => {
   const Id = new mongoose.Types.ObjectId(req.id);
-  
   try {
     const data = [
       {
@@ -85,12 +84,12 @@ const Get_Employer_Specfic_Jobs = async (req, res, next) => {
     const cat = await Post.aggregate(data);
     res.status(200).send({
       total: cat.length,
-      message: "Get all jobs related to Employer ",
+      message: "Get all categories",
       data: cat,
     });
   } catch (err) {
     res.status(404).send({
-      message: "No job found",
+      message: "No categories found",
     });
   }
 };
@@ -371,13 +370,15 @@ const Is_Job_Completed = async (req, res, next) => {
 
    
 
-    const {freelancer_start_time  , freelancer_end_time} = freelancer_Details
-    const endDates = new Date (freelancer_end_time)
-    const startDates = new Date (freelancer_start_time)
-    const u = endDates - startDates
-    const job_total_hours = (u / (1000 * 60 * 60)).toFixed(2)
+    const {freelancer_start_time  , freelancer_end_time , charges} = freelancer_Details
+    const format = 'YYYY-MM-DDTHH:mm A';
+    const endDates = moment(freelancer_end_time , format)
+    const startDates = moment(freelancer_start_time , format)
+    const u = moment.duration(endDates.diff(startDates));
+    const job_total_hours = (u.asHours()).toFixed(2)
+    
       
-    const TotalAmount = job_total_hours * Number(freelancer_Details.charges);
+    const TotalAmount = job_total_hours * Number(charges);
 
     const totalamount = await Post.updateOne(
       { _id: postid },
