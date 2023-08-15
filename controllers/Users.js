@@ -492,7 +492,7 @@ const Register_With_Social_Login = async (req, res, next) => {
     };
     if (Data.user_social_type === "Google") {
       const socialUser = await User.create(Data);
-      const expiresIn = socialUser.role === "Freelancer" ? "1h" : "23h";
+     // const expiresIn = socialUser.role === "Freelancer" ? "1h" : "23h";
       const token = jwt.sign(
         {
           id: socialUser._id,
@@ -503,7 +503,7 @@ const Register_With_Social_Login = async (req, res, next) => {
           user_device_token: socialUser.user_device_token,
         },
         process.env.SECRET_KEY,
-        { expiresIn }
+        //{ expiresIn }
       );
 
       const socail = await User.updateOne(

@@ -6,6 +6,7 @@ const moment = require('moment')
 const Get_Earning = async (req,res,next) => {
     
     const User_Id = req.id
+    console.log("3333",User_Id)
 try{
     const data = await 
     Earning

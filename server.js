@@ -14,6 +14,7 @@ const CategoryRouter = require('./router/Category')
 const PostRouter = require('./router/Posts')
 const NotificationRouter = require('./router/Notification');
 const CardRouter = require('./router/Card')
+const PaymentRouter = require('./router/Payment')
 const ReviewRouter = require('./router/Review')
 const ChatRouter = require('./router/Chats')
 const EarningRouter = require('./router/Earning')
@@ -35,6 +36,8 @@ app.use("/CardAPI/", CardRouter);
 app.use("/ReviewAPI/", ReviewRouter);
 app.use("/ChatAPI/", ChatRouter);
 app.use("/EarningAPI/", EarningRouter);
+app.use("/PaymentAPI/", PaymentRouter);
+
 // app.use("/Save_TypesAPI/", Save_Types);
 
 // routes end here

@@ -42,17 +42,7 @@ const Get_All_Cards = async (req,res,next) => {
     }
 }
 
-const Create_a_payment = async (req,res,next) => {
-try{
-const Data = {
-
-}
-}catch(err){
-    console.log(err)
-}
-}
 module.exports = {
     Add_Card,
-    Get_All_Cards,
-    Create_a_payment
+    Get_All_Cards
 }

@@ -2,7 +2,7 @@ const { Sending_Messages , Getting_Messages } = require('../utils/chats')
 const { Get_all_jobs , Create_a_Job } = require('../utils/posts')
 const { Create_a_Jobs } = require('../controllers/Posts')
 const push_notifications = require('./push_notification')
-
+const UserModal = require('../model/Users')
 const socketIoMiddleware = (io) => {
 
   io.on("connection", (socket) => {

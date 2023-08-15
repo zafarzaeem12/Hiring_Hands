@@ -2,12 +2,11 @@ const router = require('express').Router();
 const auth = require('../middleware/Authentication');
 const File = require('../middleware/ImagesandVideosData');
 const { 
-    Add_Card ,
-    Get_All_Cards
-} = require('../controllers/Card')
+    Add_Payment
+} = require('../controllers/Payment')
 
-router.post('/cardAdd' ,auth , File.user , Add_Card);
-router.get('/getallcard' , auth ,File.upload , Get_All_Cards );
+router.post('/createPayment' ,auth , File.user , Add_Payment);
+
 
 
 
