@@ -22,7 +22,7 @@ const Create_a_Jobs = async (object,callback) => {
       title: object.title,
       description: object.description,
       charges: object.charges,
-      User_id: object.id,
+      User_id: object._id,
       total_hours: object.total_hours,
       start_time: moment(object.start_time).format("YYYY-MM-DDThh:mm A"),
       end_time: moment(object.end_time).format("YYYY-MM-DDThh:mm A"),
@@ -53,6 +53,7 @@ const Create_a_Jobs = async (object,callback) => {
 
 const Get_Employer_Specfic_Jobs = async (req, res, next) => {
   const Id = new mongoose.Types.ObjectId(req.id);
+  
   try {
     const data = [
       {
@@ -84,12 +85,12 @@ const Get_Employer_Specfic_Jobs = async (req, res, next) => {
     const cat = await Post.aggregate(data);
     res.status(200).send({
       total: cat.length,
-      message: "Get all categories",
+      message: "Get all jobs related to Employer ",
       data: cat,
     });
   } catch (err) {
     res.status(404).send({
-      message: "No categories found",
+      message: "No job found",
     });
   }
 };

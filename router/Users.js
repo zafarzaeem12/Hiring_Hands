@@ -14,12 +14,14 @@ const {
     Turn_on_or_off_Notifications,
     Logout_Existing_User,
     Complete_Profile,
-    Register_With_Social_Login
+    Register_With_Social_Login,
+    Edit_Profile
 } = require('../controllers/Users')
 
 router.post('/create_new_User' , File.user , Register_New_User);
 router.post('/login' ,  File.upload ,LoginRegisteredUser);
 router.get('/profile' ,auth ,File.upload ,VerifyRegisteredUser );
+router.put('/edit_profile' , auth , File.user, Edit_Profile  );
 router.put('/update',auth ,File.upload , Update_Existing_User );
 router.delete('/delete',auth , File.upload  , Delete_Existing_User_Permanently );
 router.put('/softdelete' , Delete_and_Blocked_Existing_User_Temporaray )

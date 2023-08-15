@@ -25,6 +25,7 @@ const Register_New_User = async (req, res, next) => {
         req.body.password,
         process.env.SECRET_KEY
       ).toString(),
+      name : req.body.name,
       role : req.body.role,
       user_device_token: req.body.user_device_token || "asdfghjkl",
       user_device_type: req.body.user_device_type || "android",
@@ -174,6 +175,7 @@ const VerifyRegisteredUser = async (req, res) => {
   try {
     const Id = req.id;
     const verified_User = await User.findById(Id);
+  
     const {
        password,
        verification_code ,
@@ -191,24 +193,31 @@ const VerifyRegisteredUser = async (req, res) => {
        job_request,
        createdAt,
        updatedAt,
-       email,
        role,
        category,
        phone_number,
        state,
        __v,
         ...details } = verified_User._doc;
+        console.log(details )
 
     const userReviews = await Review.find({Freelancer_User_id : Id}).populate({path: 'rated_by_User_id',select:"name user_image" })
     const adding = userReviews.map((data) => data.rating)
     const avg =  adding.reduce((acc ,item) => acc + item)
     const Rating = Number((avg / adding.length).toFixed(1))
+    // userReviews ?
 
-    res.send({
-      message: `${details?.name} Logged in Successfully`,
-      status: 200,
-      data: { ...details , Rating ,userReviews },
-    });
+    // res.send({
+    //   message: `Logged in Successfully`,
+    //   status: 200,
+    //   data: { ...details , ...userReviews , Rating },
+    // })
+    // : 
+    // res.send({
+    //   message: `Logged in Successfully`,
+    //   status: 200,
+    //   data: { ...details  },
+    // });
   } catch (err) {
     res.send({
       message: "Login Failed!",
@@ -591,6 +600,42 @@ const Register_With_Social_Login = async (req, res, next) => {
   }
 };
 
+const Edit_Profile = async (req,res,next) => {
+  const userId = req.id
+try{
+  const userAvator = req?.file?.path?.replace(/\\/g, "/");
+  const verify = await User.findById(userId);
+  verify.role === "Client" ?
+  await User.updateOne(
+    { _id : userId },
+    { $set:{
+      user_image : userAvator,
+      company_name : req.body.company_name,
+      category : req.body.category ,
+      phone_number : req.body.phone_number,
+      business_phone_number : req.body.business_phone_number,
+      state : req.body.state
+    } },
+    { new  : true }
+  )
+  : verify.role === "Freelancer" ?
+  await User.updateOne(
+    { _id : userId },
+    { $set:{
+      user_image : req.body.user_image,
+      category : req.body.category ,
+      phone_number : req.body.phone_number,
+      state : req.body.state
+    } },
+    { new  : true }
+  )
+  : null
+    res.status(200).send({ message : "Profile Edit Successfully" })
+}catch(err){
+  res.status(404).send({ message : "Profile not Edit" })
+}
+}
+
 module.exports = {
   Register_New_User,
   LoginRegisteredUser,
@@ -605,4 +650,5 @@ module.exports = {
   Logout_Existing_User,
   Complete_Profile,
   Register_With_Social_Login,
+  Edit_Profile
 };
